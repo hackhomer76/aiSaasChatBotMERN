@@ -36,3 +36,6 @@ export const signupValidator = [
     .withMessage("Password should contain atleast 6 characters"),
 ];
 
+export const chatCompletionValidator = [
+  body("message").notEmpty().withMessage("Message is required"),
+];
