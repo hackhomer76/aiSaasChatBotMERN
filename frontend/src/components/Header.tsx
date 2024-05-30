@@ -15,7 +15,7 @@ export default function Header() {
       <Toolbar sx={{ display: "flex" }}>
         <Logo></Logo>
         <div>
-          {auth?.isLoggedIn ? (
+          {auth?.isLoggedIn ? ( 
             <>
               <NavigationLink
                 bg="#00fffc"
@@ -44,7 +44,6 @@ export default function Header() {
                 textColor="white"
                 to="/signup"
                 text="Signup"
-                onClick={auth.logout}
               />
             </>
           )}

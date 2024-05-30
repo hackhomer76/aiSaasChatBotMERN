@@ -37,6 +37,7 @@ export const sendChatsToUser = async (req, res, next) => {
     try {
         //user token check
         const user = await User.findById(res.locals.jwtData.id);
+        console.log(user);
         if (!user) {
             return res.status(401).send("User not registered OR Token malfunctioned");
         }
@@ -44,6 +45,28 @@ export const sendChatsToUser = async (req, res, next) => {
             return res.status(401).send("Permissions didn't match");
         }
         return res.status(200).json({ message: "OK", chats: user.chats });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(200).json({ message: "ERROR", cause: error.message });
+    }
+};
+//delete user's chats record
+export const deleteChats = async (req, res, next) => {
+    try {
+        //user token check
+        const user = await User.findById(res.locals.jwtData.id);
+        console.log(user);
+        if (!user) {
+            return res.status(401).send("User not registered OR Token malfunctioned");
+        }
+        if (user._id.toString() !== res.locals.jwtData.id) {
+            return res.status(401).send("Permissions didn't match");
+        }
+        //@ts-ignore
+        user.chats = [];
+        await user.save();
+        return res.status(200).json({ message: "OK" });
     }
     catch (error) {
         console.log(error);

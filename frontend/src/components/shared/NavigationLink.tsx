@@ -15,6 +15,7 @@ type Props = {
 const NavigationLink = (props:Props) => {
   return (
     <Link
+      onClick={props.onClick}
       to={props.to}
       className="nav-link"
       style={{ background: props.bg, color: props.textColor }}

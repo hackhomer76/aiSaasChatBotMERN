@@ -1,16 +1,17 @@
 
 import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
 import red from "@mui/material/colors/red" ;
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-import { useRef, useState } from 'react'
-import { sendChatRequest } from "../helpers/api-communicator";
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { deleteUserChats, getUserChats, sendChatRequest } from "../helpers/api-communicator";
 type Message = {
   role: "user" | "assistant";
   contetnt: string;
 }
-
+import toast from "react-hot-toast";
 
 
 
@@ -19,7 +20,7 @@ export default function Chat() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
   const [chatMessages, setChatMessages] = useState([])
-
+  const navigate = useNavigate();
 
 
 
@@ -34,8 +35,41 @@ export default function Chat() {
     //send message to api
     const chatData = await sendChatRequest(content);
     setChatMessages([...chatData.chats])
-  } 
+  }
 
+  const handleDeleteChats = async() => {
+    try {
+      toast.loading("Deleting Chats", {id: "deletechats"})
+      await deleteUserChats();
+      setChatMessages([]);
+
+      toast.success("Deleting Chats Successfully", { id: "deletechats" });
+    } catch(err) {
+      console.log(err);
+      toast.error("Deleting chats failed", { id: "deletechats"})
+    }
+  }
+
+
+  useLayoutEffect(() => {
+    if(auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading Chats", { id: "loadchats"});
+      getUserChats().then((data) => {
+        setChatMessages([...data.chats]);
+        toast.success("Successfully loaded chats", { id: "loadchats"})
+      }).catch(err => {
+        console.log(err)
+        toast.error("Loading Failed", { id: "loadchats"})
+    })
+    }
+  }, [auth])
+
+
+  useEffect(() => {
+    if(!auth?.user) {
+      return navigate("/login");
+    }
+  },[auth])
 
   return (
     <Box
@@ -85,6 +119,7 @@ export default function Chat() {
             Education, etc. But avoid sharing personal information
           </Typography>
           <Button
+            onClick={handleDeleteChats}
             sx={{
               width: "200px",
               my: "auto",
@@ -147,7 +182,6 @@ export default function Chat() {
         <div
           style={{
             width: "100%",
-            padding: "20px",
             borderRadius: 8,
             backgroundColor: "rgb(17,27,39",
             display: "flex",
@@ -161,7 +195,7 @@ export default function Chat() {
             style={{
               width: "100%",
               backgroundColor: "transparent",
-              padding: "10px",
+              padding: "30px",
               border: "none",
               outline: "none",
               color: "white",
@@ -170,7 +204,7 @@ export default function Chat() {
           ></input>
           <IconButton
             onClick={handleSubmit}
-            sx={{ ml: "auto", color: "white" }}
+            sx={{ ml: "auto", color: "white", mx:1 }}
           >
             <IoMdSend></IoMdSend>
           </IconButton>
